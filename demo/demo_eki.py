@@ -231,7 +231,7 @@ def parse_args():
 def action_inference(timestamp, proposal, model):
     if proposal.shape[0] == 0:
             predictions.append(None)
-            continue
+            return
 
     start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
     frame_inds = start_frame + np.arange(0, window_size, frame_interval)
@@ -262,7 +262,7 @@ def action_inference(timestamp, proposal, model):
                 if scores[j, i] > args.action_score_thr:
                     prediction[j].append((label_map[i], scores[j,
                                                                 i].item()))
-        predictions.append(prediction)
+        return prediction
     prog_bar.update()
 
 def main():
@@ -354,7 +354,7 @@ def main():
 
     prog_bar = mmengine.ProgressBar(len(timestamps))
     for timestamp, proposal in zip(timestamps, human_detections):
-        action_inference(timestamp, proposal, model)
+        predictions.appned(action_inference(timestamp, proposal, model))
 
     results = []
     for human_detection, prediction in zip(human_detections, predictions):
