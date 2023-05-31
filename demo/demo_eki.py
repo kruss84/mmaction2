@@ -228,7 +228,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def action_inference(timestamp, proposal, model, clip_len, frame_interval, window_size):
+def action_inference(timestamp, proposal, model, clip_len, frame_interval, window_size, frames):
     if proposal.shape[0] == 0:
             # predictions.append(None)
             return None
@@ -354,7 +354,7 @@ def main():
 
     prog_bar = mmengine.ProgressBar(len(timestamps))
     for timestamp, proposal in zip(timestamps, human_detections):
-        predictions.append(action_inference(timestamp, proposal, model, clip_len, frame_interval, window_size))
+        predictions.append(action_inference(timestamp, proposal, model, clip_len, frame_interval, window_size, frames))
 
     results = []
     for human_detection, prediction in zip(human_detections, predictions):
