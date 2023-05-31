@@ -230,8 +230,8 @@ def parse_args():
 
 def action_inference(timestamp, proposal, model):
     if proposal.shape[0] == 0:
-            predictions.append(None)
-            return
+            # predictions.append(None)
+            return None
 
     start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
     frame_inds = start_frame + np.arange(0, window_size, frame_interval)
