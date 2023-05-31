@@ -268,6 +268,11 @@ def main():
     except KeyError:
         pass
 
+    print('clip_len ' , clip_len)
+    print('frame_interval ', frame_interval)
+    print('window_size ', window_size)
+
+    print('ind ' , ind)
     # Get Human detection results
     center_frames = [frame_paths[ind - 1] for ind in timestamps]
 
@@ -321,6 +326,8 @@ def main():
         start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
         frame_inds = start_frame + np.arange(0, window_size, frame_interval)
         frame_inds = list(frame_inds - 1)
+        print('timestamp ' , timestamp, 'start_frame ', start_frame, frame_inds)
+
         imgs = [frames[ind].astype(np.float32) for ind in frame_inds]
         _ = [mmcv.imnormalize_(img, **img_norm_cfg) for img in imgs]
         # THWC -> CTHW -> 1CTHW
