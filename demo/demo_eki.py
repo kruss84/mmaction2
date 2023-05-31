@@ -236,7 +236,7 @@ def action_inference(timestamp, proposal, model, clip_len, frame_interval, windo
     start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
     frame_inds = start_frame + np.arange(0, window_size, frame_interval)
     frame_inds = list(frame_inds - 1)
-    print('timestamp ' , timestamp, 'start_frame ', start_frame, len(frame_inds),'proposal',proposal)
+    print('timestamp ' , timestamp, 'start_frame ', start_frame, len(frame_inds),'proposal',proposal[0])
 
     imgs = [frames[ind].astype(np.float32) for ind in frame_inds]
     _ = [mmcv.imnormalize_(img, **img_norm_cfg) for img in imgs]
@@ -290,8 +290,8 @@ def main():
     assert clip_len % 2 == 0, 'We would like to have an even clip_len'
     # Note that it's 1 based here
     timestamps = np.arange(window_size // 2, num_frame + 1 - window_size // 2,
-                           #args.predict_stepsize)
-                           1)
+                           args.predict_stepsize)
+                           
 
     # Load label_map
     label_map = load_label_map(args.label_map)
