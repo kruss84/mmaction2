@@ -354,7 +354,7 @@ def main():
 
     prog_bar = mmengine.ProgressBar(len(timestamps))
     for timestamp, proposal in zip(timestamps, human_detections):
-        predictions.appned(action_inference(timestamp, proposal, model))
+        predictions.append(action_inference(timestamp, proposal, model))
 
     results = []
     for human_detection, prediction in zip(human_detections, predictions):
