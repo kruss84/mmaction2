@@ -228,6 +228,42 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def action_inference(timestamp, proposal, model):
+    if proposal.shape[0] == 0:
+            predictions.append(None)
+            continue
+
+    start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
+    frame_inds = start_frame + np.arange(0, window_size, frame_interval)
+    frame_inds = list(frame_inds - 1)
+    print('timestamp ' , timestamp, 'start_frame ', start_frame, len(frame_inds))
+
+    imgs = [frames[ind].astype(np.float32) for ind in frame_inds]
+    _ = [mmcv.imnormalize_(img, **img_norm_cfg) for img in imgs]
+    # THWC -> CTHW -> 1CTHW
+    input_array = np.stack(imgs).transpose((3, 0, 1, 2))[np.newaxis]
+    input_tensor = torch.from_numpy(input_array).to(args.device)
+
+    datasample = ActionDataSample()
+    datasample.proposals = InstanceData(bboxes=proposal)
+    datasample.set_metainfo(dict(img_shape=(new_h, new_w)))
+    with torch.no_grad():
+        result = model(input_tensor, [datasample], mode='predict')
+        scores = result[0].pred_instances.scores
+        prediction = []
+        # N proposals
+        for i in range(proposal.shape[0]):
+            prediction.append([])
+        # Perform action score thr
+        for i in range(scores.shape[1]):
+            if i not in label_map:
+                continue
+            for j in range(proposal.shape[0]):
+                if scores[j, i] > args.action_score_thr:
+                    prediction[j].append((label_map[i], scores[j,
+                                                                i].item()))
+        predictions.append(prediction)
+    prog_bar.update()
 
 def main():
     args = parse_args()
@@ -268,9 +304,9 @@ def main():
     except KeyError:
         pass
 
-    print('clip_len ' , clip_len)
-    print('frame_interval ', frame_interval)
-    print('window_size ', window_size)
+    print('clip_len ' , clip_len) # 8
+    print('frame_interval ', frame_interval) # 8
+    print('window_size ', window_size) # 64
 
     # Get Human detection results
     center_frames = [frame_paths[ind - 1] for ind in timestamps]
@@ -318,41 +354,7 @@ def main():
 
     prog_bar = mmengine.ProgressBar(len(timestamps))
     for timestamp, proposal in zip(timestamps, human_detections):
-        if proposal.shape[0] == 0:
-            predictions.append(None)
-            continue
-
-        start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
-        frame_inds = start_frame + np.arange(0, window_size, frame_interval)
-        frame_inds = list(frame_inds - 1)
-        print('timestamp ' , timestamp, 'start_frame ', start_frame, len(frame_inds))
-
-        imgs = [frames[ind].astype(np.float32) for ind in frame_inds]
-        _ = [mmcv.imnormalize_(img, **img_norm_cfg) for img in imgs]
-        # THWC -> CTHW -> 1CTHW
-        input_array = np.stack(imgs).transpose((3, 0, 1, 2))[np.newaxis]
-        input_tensor = torch.from_numpy(input_array).to(args.device)
-
-        datasample = ActionDataSample()
-        datasample.proposals = InstanceData(bboxes=proposal)
-        datasample.set_metainfo(dict(img_shape=(new_h, new_w)))
-        with torch.no_grad():
-            result = model(input_tensor, [datasample], mode='predict')
-            scores = result[0].pred_instances.scores
-            prediction = []
-            # N proposals
-            for i in range(proposal.shape[0]):
-                prediction.append([])
-            # Perform action score thr
-            for i in range(scores.shape[1]):
-                if i not in label_map:
-                    continue
-                for j in range(proposal.shape[0]):
-                    if scores[j, i] > args.action_score_thr:
-                        prediction[j].append((label_map[i], scores[j,
-                                                                   i].item()))
-            predictions.append(prediction)
-        prog_bar.update()
+        action_inference(timestamp, proposal, model)
 
     results = []
     for human_detection, prediction in zip(human_detections, predictions):
