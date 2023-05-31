@@ -309,7 +309,9 @@ def main():
     assert len(timestamps) == len(human_detections)
 
     print(num_frame,len(timestamps), len(human_detections))
-    
+    print(timestamps)
+    print(human_detections)
+
     prog_bar = mmengine.ProgressBar(len(timestamps))
     for timestamp, proposal in zip(timestamps, human_detections):
         if proposal.shape[0] == 0:
