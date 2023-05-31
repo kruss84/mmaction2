@@ -290,7 +290,8 @@ def main():
     assert clip_len % 2 == 0, 'We would like to have an even clip_len'
     # Note that it's 1 based here
     timestamps = np.arange(window_size // 2, num_frame + 1 - window_size // 2,
-                           args.predict_stepsize)
+                           #args.predict_stepsize)
+                           4)
 
     # Load label_map
     label_map = load_label_map(args.label_map)
