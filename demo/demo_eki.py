@@ -236,7 +236,7 @@ def action_inference(timestamp, proposal, model, clip_len, frame_interval, windo
     start_frame = timestamp - (clip_len // 2 - 1) * frame_interval
     frame_inds = start_frame + np.arange(0, window_size, frame_interval)
     frame_inds = list(frame_inds - 1)
-    print('timestamp ' , timestamp, 'start_frame ', start_frame, len(frame_inds),'proposal',proposal[0])
+    print('timestamp ' , timestamp, 'start_frame ', start_frame, len(frame_inds),'proposal',proposal[0][0])
 
     imgs = [frames[ind].astype(np.float32) for ind in frame_inds]
     _ = [mmcv.imnormalize_(img, **img_norm_cfg) for img in imgs]
