@@ -245,10 +245,10 @@ def action_inference(timestamp, proposal, model, clip_len, frame_interval, windo
     input_tensor = torch.from_numpy(input_array).to(args.device)
 
     datasample = ActionDataSample()
-    datasample.proposals = InstanceData(bboxes=proposal)
+    datasample.proposals = InstanceData(bboxes=[proposal[0]])
     datasample.set_metainfo(dict(img_shape=(new_h, new_w)))
     with torch.no_grad():
-        result = model(input_tensor, [datasample, datasample], mode='predict')
+        result = model(input_tensor, [datasample], mode='predict')
         scores = result[0].pred_instances.scores
         prediction = []
         # N proposals
