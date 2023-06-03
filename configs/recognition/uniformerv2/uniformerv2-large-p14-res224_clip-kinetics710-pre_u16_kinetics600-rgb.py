@@ -42,11 +42,11 @@ data_root_val = 'data/k600'
 ann_file_test = 'data/k600/val.csv'
 
 test_pipeline = [
-    dict(type='DecordInit'),
+    dict(type='RawFrameDecode'),
     dict(
         type='UniformSample', clip_len=num_frames, num_clips=4,
         test_mode=True),
-    dict(type='DecordDecode'),
+    #dict(type='DecordDecode'),
     dict(type='Resize', scale=(-1, 224)),
     dict(type='ThreeCrop', crop_size=224),
     dict(type='FormatShape', input_format='NCTHW'),
